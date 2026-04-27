@@ -18,7 +18,7 @@ def make_tone(freq, duration=0.1, volume=0.3):
     return sound
 
 current_sound = None
-
+ 
 def distance_3d(point1, point2):
     return math.sqrt(
         (point1.x - point2.x)**2 +
@@ -49,20 +49,27 @@ while cap.isOpened():
 
             thumb_tip = hand.landmark[4]
             index_tip = hand.landmark[8]
+            pinky_tip = hand.landmark[20]
+            wrist = hand.landmark[0]
 
             # calculate distance between thumb tip and index tip
             dist = distance_3d(thumb_tip, index_tip)
+            normalized_dist = round(dist, 1)
             # freq = int(200 + (1 - dist) * 800)
 
             min_d = 0.03
             max_d = 0.3
 
-            t = (dist - min_d) / (max_d - min_d)
+            t = (normalized_dist - min_d) / (max_d - min_d)
             t = max(0.0, min(1.0, t))
-            freq = int(200 + t * 800)
+            dist_pinky_wrist = distance_3d(pinky_tip, wrist)
+            if dist_pinky_wrist < 0.15:
+                freq = int(100 + t * 400)
+            else:
+                freq = int(500 + t * 2000)
 
-            if current_sound:
-                current_sound.stop()
+            # if current_sound:
+            #     current_sound.stop()
             current_sound = make_tone(freq)
             current_sound.play()
 
